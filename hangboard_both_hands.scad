@@ -2,9 +2,13 @@
 finger_width = 30;      // Width for each finger position
 total_width = finger_width * 4;  // Total width for 4 fingers
 base_depth = 60;        // How deep the hangboard is
-base_height = 20;       // Minimum height of the base
+base_height = 10;       // Minimum height of the base
 round_radius = 5;       // Radius for rounded edges
 use_minkowski = true;   // Toggle to enable/disable rounded edges
+
+// Frame parameters
+frame_thickness = 15;   // Thickness of the frame walls
+frame_extension = 20;   // How much the frame extends beyond the climbing surfaces
 
 // Concave surface parameters
 cylinder_radius = 60;  // Larger radius = gentler curve
@@ -61,8 +65,8 @@ module make_platform(width, height) {
 module single_hand(h2, h3, h4, h5) {
     union() {
         // Individual finger platforms
-        translate([0, 0, 0])
-            finger_platform(finger_width, base_height + h2);  // Index
+        translate([-round_radius-3, 0, 0])
+            finger_platform(finger_width+round_radius+3, base_height + h2);  // Index
 
         translate([finger_width, 0, 0])
             finger_platform(finger_width, base_height + h3);  // Middle
@@ -71,7 +75,7 @@ module single_hand(h2, h3, h4, h5) {
             finger_platform(finger_width, base_height + h4);  // Ring
 
         translate([finger_width * 3, 0, 0])
-            finger_platform(finger_width, base_height + h5);  // Pinky
+            finger_platform(finger_width+round_radius+3, base_height + h5);  // Pinky
     }
 }
 
@@ -86,4 +90,78 @@ module two_handed_hangboard() {
             single_hand(h2_left, h3_left, h4_left, h5_left);
 }
 
-two_handed_hangboard();
+module frame() {
+    translate([-frame_thickness,0,-frame_thickness])
+    minkowski() { // round edges
+        difference() {
+            // Outer frame
+            cube([total_width + frame_thickness * 2,
+                  base_depth,
+                  total_width + frame_thickness * 2]);
+
+            // Inner cutout
+            translate([frame_thickness/2, -1, frame_thickness])
+                cube([total_width+frame_thickness,
+                  base_depth + 2,
+                      total_width]);
+        }
+        sphere(r=round_radius);
+    }
+}
+
+module back() {
+    minkowski() {
+        translate([-frame_thickness,60,-frame_thickness])
+        cube([total_width + frame_thickness * 2,
+            frame_thickness,
+            total_width + frame_thickness * 2]);
+        sphere(r=round_radius);
+    }
+}
+
+module support_for_holes() {
+    minkowski() {
+        rotate([90,0,0])
+        translate([total_width/2,
+                    total_width/2,
+                    round_radius/2-base_depth + frame_thickness + round_radius])
+        difference() {
+            //%color("red", 0.3)
+            cylinder(h=base_depth + frame_thickness, r=110, center=true);
+            //%color("blue", 0.3)
+            rotate([-90,0,0])
+            cube([total_width + frame_thickness * 2,
+                base_depth*2,
+                total_width + frame_thickness * 2],
+                center=true
+                );
+        }
+        sphere(r=round_radius);
+    }
+}
+
+module holes() {
+    rotate([90,0,0])
+        translate([-frame_thickness*2,
+                    total_width/2,
+                    round_radius/2-base_depth + frame_thickness + round_radius])
+        cylinder(h=base_depth + frame_thickness*4, r=10, center=true);
+
+    rotate([90,0,0])
+    translate([total_width+frame_thickness*2,
+                    total_width/2,
+                    round_radius/2-base_depth + frame_thickness + round_radius])
+        cylinder(h=base_depth + frame_thickness*4, r=10, center=true);
+}
+
+module complete_hangboard() {
+    frame();
+    back();
+    difference() {
+        support_for_holes();
+        holes();
+    }
+    two_handed_hangboard();
+}
+
+complete_hangboard();
