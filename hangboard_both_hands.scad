@@ -4,7 +4,6 @@ total_width = finger_width * 4;  // Total width for 4 fingers
 base_depth = 60;        // How deep the hangboard is
 base_height = 10;       // Minimum height of the base
 round_radius = 5;       // Radius for rounded edges
-use_minkowski = true;   // Toggle to enable/disable rounded edges
 
 // Frame parameters
 frame_thickness = 15;   // Thickness of the frame walls
@@ -26,18 +25,8 @@ h3_left = 25;   // Middle finger height
 h4_left = 15;   // Ring finger height
 h5_left = 10;   // Pinky finger height
 
-// Debug flag - set to true to see the cutting objects
-debug_view = false;  // Toggle this to see the cutting objects
-
 module finger_platform(width, height) {
-    if (use_minkowski) {
-        minkowski() { // round edges
-            make_platform(width, height);
-            sphere(r=round_radius);
-        }
-    } else {
-        make_platform(width, height);
-    }
+    make_platform(width, height);
 }
 
 module make_platform(width, height) {
@@ -47,17 +36,9 @@ module make_platform(width, height) {
             cube([width, base_depth, height]);
 
         // Concave surface cutout
-        if (debug_view) {
-            // Show the cutting cylinder in transparent yellow
-            %color("yellow", 0.3)
-            translate([width/2, base_depth, height + cylinder_offset])
-                rotate([90, 0, 0])
-                    cylinder(r=cylinder_radius, h=base_depth, $fn=100);
-        } else {
-            translate([width/2, base_depth, height + cylinder_offset])
-                rotate([90, 0, 0])
-                    cylinder(r=cylinder_radius, h=base_depth, $fn=100);
-        }
+        translate([width/2, base_depth, height + cylinder_offset])
+            rotate([90, 0, 0])
+                cylinder(r=cylinder_radius, h=base_depth, $fn=100);
     }
 }
 
@@ -92,51 +73,42 @@ module two_handed_hangboard() {
 
 module frame() {
     translate([-frame_thickness,0,-frame_thickness])
-    minkowski() { // round edges
-        difference() {
-            // Outer frame
-            cube([total_width + frame_thickness * 2,
-                  base_depth,
-                  total_width + frame_thickness * 2]);
+    difference() {
+        // Outer frame
+        cube([total_width + frame_thickness * 2,
+              base_depth,
+              total_width + frame_thickness * 2]);
 
-            // Inner cutout
-            translate([frame_thickness/2, -1, frame_thickness])
-                cube([total_width+frame_thickness,
-                  base_depth + 2,
-                      total_width]);
-        }
-        sphere(r=round_radius);
+        // Inner cutout
+        translate([frame_thickness/2, -1, frame_thickness])
+            cube([total_width+frame_thickness,
+              base_depth + 2,
+                  total_width]);
     }
 }
 
 module back() {
-    minkowski() {
-        translate([-frame_thickness,60,-frame_thickness])
-        cube([total_width + frame_thickness * 2,
-            frame_thickness,
-            total_width + frame_thickness * 2]);
-        sphere(r=round_radius);
-    }
+    translate([-frame_thickness,60,-frame_thickness])
+    cube([total_width + frame_thickness * 2,
+        frame_thickness,
+        total_width + frame_thickness * 2]);
 }
 
 module support_for_holes() {
-    minkowski() {
-        rotate([90,0,0])
-        translate([total_width/2,
-                    total_width/2,
-                    round_radius/2-base_depth + frame_thickness + round_radius])
-        difference() {
-            //%color("red", 0.3)
-            cylinder(h=base_depth + frame_thickness, r=110, center=true);
-            //%color("blue", 0.3)
-            rotate([-90,0,0])
-            cube([total_width + frame_thickness * 2,
-                base_depth*2,
-                total_width + frame_thickness * 2],
-                center=true
-                );
-        }
-        sphere(r=round_radius);
+    rotate([90,0,0])
+    translate([total_width/2,
+                total_width/2,
+                round_radius/2-base_depth + frame_thickness + round_radius])
+    difference() {
+        //%color("red", 0.3)
+        cylinder(h=base_depth + frame_thickness, r=110, center=true);
+        //%color("blue", 0.3)
+        rotate([-90,0,0])
+        cube([total_width + frame_thickness * 2,
+            base_depth*2,
+            total_width + frame_thickness * 2],
+            center=true
+            );
     }
 }
 
@@ -168,10 +140,13 @@ module complete_hangboard() {
     two_handed_hangboard();
 }
 
-difference() {
-    complete_hangboard();
-    translate([-total_width/2,-10,-base_height*7])
-    excess_material();
-    translate([-total_width/2,-10,base_height*13])
-    excess_material();
+minkowski() {
+    difference() {
+        complete_hangboard();
+        translate([-total_width/2,-10,-base_height*7])
+        excess_material();
+        translate([-total_width/2,-10,base_height*13])
+        excess_material();
+    }
+    sphere(r=round_radius);
 }
