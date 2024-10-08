@@ -1,10 +1,15 @@
 // Configurable parameters
 finger_width = 25;      // Width for each finger position
-base_depth = 40;        // How deep the hangboard is
+base_depth = 30;        // How deep the hangboard is
 base_height = 5;       // Minimum height of the base
 round_radius = 5;       // Radius for rounded edges
 // Distance between the two h3 surfaces
 distance_between_hands = 30;
+
+// To remove the inserts, set depth to 0
+insert_1_depth = 20;    // Depth of the first insert
+insert_2_depth = 10;    // Depth of the second insert
+insert_3_depth = 5;     // Depth of the third insert
 
 // Frame parameters
 frame_thickness = 15;   // Thickness of the frame walls
@@ -149,6 +154,18 @@ module complete_hangboard() {
     two_handed_hangboard();
 }
 
+module inserts(size) {
+    difference() {
+      difference() {
+        cube([total_width,size,total_height]);
+        complete_hangboard();
+      }
+      rotate([90,0,0])
+      translate([0,total_height/2,0])
+      cylinder(h=base_depth*2, r=frame_holes_radius, center=true);
+    }
+}
+
 if (round_edges) {
     minkowski() {
         complete_hangboard();
@@ -156,4 +173,20 @@ if (round_edges) {
     }
 } else {
     complete_hangboard();
+}
+
+// inserts
+if (insert_1_depth > 0) {
+    translate([0,0,total_height*2])
+    inserts(insert_1_depth);
+}
+
+if (insert_2_depth > 0) {
+    translate([total_width*1.5,0,total_height*2])
+    inserts(insert_2_depth);
+}
+
+if (insert_3_depth > 0) {
+    translate([total_width*3,0,total_height*2])
+    inserts(insert_3_depth);
 }
