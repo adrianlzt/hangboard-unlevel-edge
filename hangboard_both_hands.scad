@@ -154,6 +154,10 @@ module holes() {
         cylinder(h=base_depth + frame_thickness*4, r=10, center=true);
 }
 
+module excess_material() {
+    cube([total_width*2,base_depth*2,base_depth]);
+}
+
 module complete_hangboard() {
     frame();
     back();
@@ -164,4 +168,10 @@ module complete_hangboard() {
     two_handed_hangboard();
 }
 
-complete_hangboard();
+difference() {
+    complete_hangboard();
+    translate([-total_width/2,-10,-base_height*7])
+    excess_material();
+    translate([-total_width/2,-10,base_height*13])
+    excess_material();
+}
