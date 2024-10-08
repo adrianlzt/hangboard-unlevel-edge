@@ -1,15 +1,15 @@
 // Configurable parameters
 finger_width = 25;      // Width for each finger position
-base_depth = 60;        // How deep the hangboard is
+base_depth = 40;        // How deep the hangboard is
 base_height = 5;       // Minimum height of the base
 round_radius = 5;       // Radius for rounded edges
 // Distance between the two h3 surfaces
-distance_between_hands = 40;
+distance_between_hands = 30;
 
 // Frame parameters
 frame_thickness = 15;   // Thickness of the frame walls
 frame_extension = 20;   // How much the frame extends beyond the climbing surfaces
-frame_holes_radius = 10;  // Radius of the holes in the frame
+frame_holes_radius = 9;  // Radius of the holes in the frame
 
 // Heights for each finger position - Right hand
 h2_right = 2;  // Index finger height
@@ -34,15 +34,11 @@ total_width = finger_width * 4;  // Total width for 4 fingers
 total_height = base_height + h3_right + h3_left + distance_between_hands;
 frame_circle_radius = total_width;
 
-module finger_platform(width, height) {
-    make_platform(width, height);
-}
+%echo("Size of the hangboard: ", frame_circle_radius*2, " x ", total_height+2*frame_thickness, " x ", base_depth+frame_thickness);
 
-module make_platform(width, height) {
+module finger_platform(width, height) {
     difference() {
-        // Main block
-        color("skyblue")
-            cube([width, base_depth, height]);
+        cube([width, base_depth, height]);
 
         // Concave surface cutout
         translate([width/2, base_depth, height + cylinder_offset])
@@ -97,7 +93,7 @@ module frame() {
 }
 
 module back() {
-    translate([-frame_thickness,60,-frame_thickness])
+    translate([-frame_thickness,base_depth,-frame_thickness])
     cube([total_width + frame_thickness * 2,
         frame_thickness,
         total_height + frame_thickness * 2]);
