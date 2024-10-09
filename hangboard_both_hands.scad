@@ -50,9 +50,9 @@ module finger_platform(width, height) {
         cube([width, base_depth, height]);
 
         // Concave surface cutout
-        translate([width/2, base_depth, height + cylinder_offset])
+        translate([width/2, base_depth+1, height + cylinder_offset])
             rotate([90, 0, 0])
-                cylinder(r=cylinder_radius, h=base_depth, $fn=100);
+                cylinder(r=cylinder_radius, h=base_depth+2, $fn=100);
     }
 }
 
@@ -96,7 +96,7 @@ module frame() {
         // Inner cutout
         translate([0, -1, frame_thickness])
             cube([total_width,
-              base_depth + 2,
+              base_depth+frame_thickness+2,
                   total_height]);
     }
 }
@@ -116,14 +116,15 @@ module support_for_holes() {
 
         union() {
           rotate([-90,0,0])
-          translate([-frame_circle_radius,frame_thickness,0])
-          cube([frame_circle_radius*3, frame_circle_radius, base_depth+frame_thickness]);
+          translate([-frame_circle_radius,frame_thickness,-1])
+          cube([frame_circle_radius*3, frame_circle_radius, base_depth+frame_thickness+2]);
 
           rotate([-90,0,0])
-          translate([-frame_circle_radius,-total_height-frame_thickness-frame_circle_radius,0])
-          cube([frame_circle_radius*3, frame_circle_radius, base_depth+frame_thickness]);
+          translate([-frame_circle_radius,-total_height-frame_thickness-frame_circle_radius,-1])
+          cube([frame_circle_radius*3, frame_circle_radius, base_depth+frame_thickness+2]);
 
-          cube([total_width, base_depth+frame_thickness, total_height]);
+          translate([0,-1,0])
+          cube([total_width, base_depth+frame_thickness+2, total_height]);
         }
     }
 }
@@ -162,6 +163,7 @@ module inserts(size) {
     difference() {
       difference() {
         cube([total_width,size,total_height]);
+        translate([0,-1,0])
         complete_hangboard();
       }
       rotate([90,0,0])
