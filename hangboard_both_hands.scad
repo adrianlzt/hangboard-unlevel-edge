@@ -1,3 +1,6 @@
+// TODO
+// Round hace los dedos más pequeños
+//
 // Configurable parameters
 finger_width = 25;      // Width for each finger position
 base_depth = 30;        // How deep the hangboard is
@@ -13,6 +16,7 @@ insert_3_depth = 5;     // Depth of the third insert
 
 // Frame parameters
 frame_thickness = 15;   // Thickness of the frame walls
+hole_margin = 15; // The margin between the holes and the frame
 frame_extension = 20;   // How much the frame extends beyond the climbing surfaces
 frame_holes_radius = 9;  // Radius of the holes in the frame
 
@@ -37,7 +41,7 @@ cylinder_offset = 55;   // How far above the surface to place cylinder
 
 total_width = finger_width * 4;  // Total width for 4 fingers
 total_height = base_height + h3_right + h3_left + distance_between_hands;
-frame_circle_radius = total_width;
+frame_circle_radius = (total_width/2)+frame_holes_radius*2+hole_margin;
 
 %echo("Size of the hangboard: ", frame_circle_radius*2, " x ", total_height+2*frame_thickness, " x ", base_depth+frame_thickness);
 
@@ -82,15 +86,15 @@ module two_handed_hangboard() {
 }
 
 module frame() {
-    translate([-frame_thickness,0,-frame_thickness])
+    translate([0,0,-frame_thickness])
     difference() {
         // Outer frame
-        cube([total_width + frame_thickness * 2,
+        cube([total_width,
               base_depth,
               total_height + frame_thickness * 2]);
 
         // Inner cutout
-        translate([frame_thickness, -1, frame_thickness])
+        translate([0, -1, frame_thickness])
             cube([total_width,
               base_depth + 2,
                   total_height]);
@@ -98,8 +102,8 @@ module frame() {
 }
 
 module back() {
-    translate([-frame_thickness,base_depth,-frame_thickness])
-    cube([total_width + frame_thickness * 2,
+    translate([0,base_depth,-frame_thickness])
+    cube([total_width,
         frame_thickness,
         total_height + frame_thickness * 2]);
 }
