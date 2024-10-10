@@ -1,6 +1,6 @@
-// TODO
-// Round hace los dedos más pequeños
-//
+include <Round-Anything/polyround.scad>
+include <Round-Anything/MinkowskiRound.scad>
+
 // Configurable parameters
 finger_width = 25;      // Width for each finger position
 base_depth = 30;        // How deep the hangboard is
@@ -21,39 +21,71 @@ frame_extension = 20;   // How much the frame extends beyond the climbing surfac
 frame_holes_radius = 9;  // Radius of the holes in the frame
 
 // Heights for each finger position - Right hand
-h2_right = 2;  // Index finger height
+h2_right = 4;  // Index finger height
 h3_right = 15;  // Middle finger height
 h4_right = 5;  // Ring finger height
-h5_right = 0;  // Pinky finger height
+h5_right = 2;  // Pinky finger height
 
 // Heights for each finger position - Left hand
-h2_left = 2;   // Index finger height
+h2_left = 4;   // Index finger height
 h3_left = 15;   // Middle finger height
 h4_left = 5;   // Ring finger height
-h5_left = 0;   // Pinky finger height
+h5_left = 2;   // Pinky finger height
 
-// Decide to round the piece or not
-round_edges = false;
+// Parameters to create the finger platform concavity
+finger_platform_concavity = 35;
+finger_platform_concavity_depth = 2;
 
-// Concave surface parameters
-cylinder_radius = 60;  // Larger radius = gentler curve
-cylinder_offset = 55;   // How far above the surface to place cylinder
+// Decide to round the edge of the finger platform or not
+round_edges = 1; // 1 to round the edges, 0 to keep them straight
+round_edges_minkowski = false;
+edge_round_radius = 1;
+round_edges_fn = 10;
+
+cylinder_radius=60;
+cylinder_offset=55;
 
 total_width = finger_width * 4;  // Total width for 4 fingers
 total_height = base_height + h3_right + h3_left + distance_between_hands;
 frame_circle_radius = (total_width/2)+frame_holes_radius*2+hole_margin;
 
-%echo("Size of the hangboard: ", frame_circle_radius*2, " x ", total_height+2*frame_thickness, " x ", base_depth+frame_thickness);
+echo("Size of the hangboard: ", frame_circle_radius*2, " x ", total_height+2*frame_thickness, " x ", base_depth+frame_thickness);
 
 module finger_platform(width, height) {
-    difference() {
-        cube([width, base_depth, height]);
+  if (round_edges_minkowski) {
+      $fn=round_edges_fn;
+      minkowskiOutsideRound(edge_round_radius,round_edges)
+      difference() {
+          cube([width, base_depth, height]);
 
-        // Concave surface cutout
-        translate([width/2, base_depth+1, height + cylinder_offset])
-            rotate([90, 0, 0])
-                cylinder(r=cylinder_radius, h=base_depth+2, $fn=100);
+          translate([width/2, base_depth+1, height + cylinder_offset])
+              rotate([90, 0, 0])
+                  cylinder(r=cylinder_radius, h=base_depth+2, $fn=100);
+      }
+  } else {
+    translate([width,0,height])
+    rotate([0,90,90])
+    if (round_edges) {
+      radiiPoints=[
+        [0,0,0],
+        [finger_platform_concavity_depth,width/2,finger_platform_concavity],
+        [0,width,0],
+        [height,width,0],
+        [height,0,0]
+      ];
+
+      polyRoundExtrude(radiiPoints,base_depth,edge_round_radius,0,fn=round_edges_fn);
+    } else {
+      radiiPoints=[
+        [0,0],
+        [0,width],
+        [height,width],
+        [height,0]
+      ];
+      linear_extrude(height = base_depth)
+      polygon(radiiPoints);
     }
+  }
 }
 
 // Module for single hand
@@ -172,14 +204,7 @@ module inserts(size) {
     }
 }
 
-if (round_edges) {
-    minkowski() {
-        complete_hangboard();
-        sphere(r=round_radius);
-    }
-} else {
-    complete_hangboard();
-}
+complete_hangboard();
 
 // inserts
 if (insert_1_depth > 0) {
