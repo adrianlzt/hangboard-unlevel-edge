@@ -1,24 +1,4 @@
 include <Round-Anything/polyround.scad>
-include <Round-Anything/MinkowskiRound.scad>
-
-// Configurable parameters
-finger_width = 25;      // Width for each finger position
-base_depth = 30;        // How deep the hangboard is
-base_height = 5;       // Minimum height of the base
-round_radius = 5;       // Radius for rounded edges
-// Distance between the two h3 surfaces
-distance_between_hands = 30;
-
-// To remove the inserts, set depth to 0
-insert_1_depth = 20;    // Depth of the first insert
-insert_2_depth = 10;    // Depth of the second insert
-insert_3_depth = 5;     // Depth of the third insert
-
-// Frame parameters
-frame_thickness = 15;   // Thickness of the frame walls
-hole_margin = 15; // The margin between the holes and the frame
-frame_extension = 20;   // How much the frame extends beyond the climbing surfaces
-frame_holes_radius = 9;  // Radius of the holes in the frame
 
 // Heights for each finger position - Right hand
 h2_right = 4;  // Index finger height
@@ -32,192 +12,90 @@ h3_left = 15;   // Middle finger height
 h4_left = 5;   // Ring finger height
 h5_left = 2;   // Pinky finger height
 
+finger_width = 25;      // Width for each finger position
+base_depth = 30;        // How deep the hangboard is
+
+// Distance between the two h3 surfaces
+distance_between_hands = 30;
+
+// To remove the inserts, define an empty list
+inserts_depth = [base_depth/2, base_depth/3, base_depth/4];  // Depth of the inserts
+
+// Frame parameters
+frame_thickness = 9;   // Thickness of the frame walls
+hole_radius = 6;  // Radius of the holes in the frame
+
 // Parameters to create the finger platform concavity
 finger_platform_concavity = 35;
 finger_platform_concavity_depth = 2;
 
 // Decide to round the edge of the finger platform or not
-round_edges = 1; // 1 to round the edges, 0 to keep them straight
-round_edges_minkowski = false;
-edge_round_radius = 1;
-round_edges_fn = 10;
+edge_round_radius = 2;
+round_edges_fn = 30;
 
-cylinder_radius=60;
-cylinder_offset=55;
+distance_between_bases = distance_between_hands + h3_right + h3_left;
 
-total_width = finger_width * 4;  // Total width for 4 fingers
-total_height = base_height + h3_right + h3_left + distance_between_hands;
-frame_circle_radius = (total_width/2)+frame_holes_radius*2+hole_margin;
+// The object to be subsctracted from the frame, with "negative fillets" if round is true, to get round edges in the frame.
+module insert(width, round=true) {
+    right_hand = [h2_right, h3_right, h4_right, h5_right];
+    left_hand = [h2_left, h3_left, h4_left, h5_left];
 
-echo("Size of the hangboard: ", frame_circle_radius*2, " x ", total_height+2*frame_thickness, " x ", base_depth+frame_thickness);
+    function finger_points(hand, start, reverse=false) = [
+        for (i = [0:3]) let(
+            x = (start + (reverse ? -1 : 1) * i) * finger_width,
+            h = reverse ? (distance_between_bases - hand[3-i]) : hand[i]
+        ) each [
+            [x, h, 0],
+            [x + (reverse ? -1 : 1) * finger_width/2, h + (reverse ? 1 : -1) * finger_platform_concavity_depth, finger_platform_concavity],
+            [x + (reverse ? -1 : 1) * finger_width, h, 0]
+        ]
+    ];
 
-module finger_platform(width, height) {
-  if (round_edges_minkowski) {
-      $fn=round_edges_fn;
-      minkowskiOutsideRound(edge_round_radius,round_edges)
-      difference() {
-          cube([width, base_depth, height]);
+    radiiPoints = concat(
+        finger_points(right_hand, 0),
+        finger_points(left_hand, 4, true)
+    );
 
-          translate([width/2, base_depth+1, height + cylinder_offset])
-              rotate([90, 0, 0])
-                  cylinder(r=cylinder_radius, h=base_depth+2, $fn=100);
-      }
-  } else {
-    translate([width,0,height])
-    rotate([0,90,90])
-    if (round_edges) {
-      radiiPoints=[
-        [0,0,0],
-        [finger_platform_concavity_depth,width/2,finger_platform_concavity],
-        [0,width,0],
-        [height,width,0],
-        [height,0,0]
-      ];
-
-      polyRoundExtrude(radiiPoints,base_depth,edge_round_radius,0,fn=round_edges_fn);
-    } else {
-      radiiPoints=[
-        [0,0],
-        [0,width],
-        [height,width],
-        [height,0]
-      ];
-      linear_extrude(height = base_depth)
-      polygon(radiiPoints);
-    }
-  }
+    polyRoundExtrude(radiiPoints, width, (round ? -edge_round_radius : 0), 0, fn=round_edges_fn);
 }
 
-// Module for single hand
-module single_hand(h2, h3, h4, h5) {
-    union() {
-        // Individual finger platforms
-        translate([0, 0, 0])
-            finger_platform(finger_width, base_height + h2);  // Index
-
-        translate([finger_width, 0, 0])
-            finger_platform(finger_width, base_height + h3);  // Middle
-
-        translate([finger_width * 2, 0, 0])
-            finger_platform(finger_width, base_height + h4);  // Ring
-
-        translate([finger_width * 3, 0, 0])
-            finger_platform(finger_width, base_height + h5);  // Pinky
-    }
-}
-
-// Main module for the two-handed hangboard
-module two_handed_hangboard() {
-    // Right hand (bottom)
-    single_hand(h2_right, h3_right, h4_right, h5_right);
-
-    // Left hand (top, rotated 90 degrees)
-    translate([0, base_depth, base_height+h3_right+h3_left+distance_between_hands])
-        rotate([0, 180, 180])
-            single_hand(h2_left, h3_left, h4_left, h5_left);
-}
-
+// Main structure of the hangboard
 module frame() {
-    translate([0,0,-frame_thickness])
-    difference() {
-        // Outer frame
-        cube([total_width,
-              base_depth,
-              total_height + frame_thickness * 2]);
+  radiiPoints = [
+    [-frame_thickness, -frame_thickness, 5],
+    [4*finger_width+frame_thickness, -frame_thickness, 5],
 
-        // Inner cutout
-        translate([0, -1, frame_thickness])
-            cube([total_width,
-              base_depth+frame_thickness+2,
-                  total_height]);
-    }
+    [4*finger_width+frame_thickness*4+hole_radius, distance_between_bases/2, 30],
+
+    [4*finger_width+frame_thickness, distance_between_bases+frame_thickness, 5],
+    [-frame_thickness, distance_between_bases+frame_thickness, 5],
+
+    [-frame_thickness*4-hole_radius, distance_between_bases/2, 30],
+  ];
+
+  polyRoundExtrude(radiiPoints, base_depth+frame_thickness, edge_round_radius, 0, fn=round_edges_fn);
 }
 
-module back() {
-    translate([0,base_depth,-frame_thickness])
-    cube([total_width,
-        frame_thickness,
-        total_height + frame_thickness * 2]);
-}
-
-module support_for_holes() {
-    difference() {
-        rotate([90,0,0])
-        translate([total_width/2,total_height/2,-(base_depth+frame_thickness)/2])
-        cylinder(h=base_depth+frame_thickness, r=frame_circle_radius, center=true);
-
-        union() {
-          rotate([-90,0,0])
-          translate([-frame_circle_radius,frame_thickness,-1])
-          cube([frame_circle_radius*3, frame_circle_radius, base_depth+frame_thickness+2]);
-
-          rotate([-90,0,0])
-          translate([-frame_circle_radius,-total_height-frame_thickness-frame_circle_radius,-1])
-          cube([frame_circle_radius*3, frame_circle_radius, base_depth+frame_thickness+2]);
-
-          translate([0,-1,0])
-          cube([total_width, base_depth+frame_thickness+2, total_height]);
-        }
-    }
-}
-
+// Two holes to pass the rope
 module holes() {
-    rotate([90,0,0])
-    translate([
-        -(frame_circle_radius-total_width/2)/2,
-        total_height/2,
-        -base_depth/2])
-    cylinder(h=base_depth*2, r=frame_holes_radius, center=true);
-
-    rotate([90,0,0])
-    translate([
-        total_width+(frame_circle_radius-total_width/2)/2,
-        total_height/2,
-        -base_depth/2])
-    cylinder(h=base_depth*2, r=frame_holes_radius, center=true);
+  translate([-hole_radius-frame_thickness, distance_between_bases/2, 0])
+    extrudeWithRadius(base_depth+frame_thickness,-1,-1)
+      circle(hole_radius);
+  translate([+hole_radius+frame_thickness+4*finger_width, distance_between_bases/2, 0])
+    extrudeWithRadius(base_depth+frame_thickness,-1,-1)
+      circle(hole_radius);
 }
 
-module excess_material() {
-    cube([total_width*2,base_depth*2,base_depth]);
+// Remove from the frame the insert and the holes
+difference() {
+  frame();
+  holes();
+  translate([0,0,frame_thickness])
+    insert(width=base_depth);
 }
 
-module complete_hangboard() {
-    frame();
-    back();
-    difference() {
-        support_for_holes();
-        holes();
-    }
-    two_handed_hangboard();
-}
-
-module inserts(size) {
-    difference() {
-      difference() {
-        cube([total_width,size,total_height]);
-        translate([0,-1,0])
-        complete_hangboard();
-      }
-      rotate([90,0,0])
-      translate([0,total_height/2,0])
-      cylinder(h=base_depth*2, r=frame_holes_radius, center=true);
-    }
-}
-
-complete_hangboard();
-
-// inserts
-if (insert_1_depth > 0) {
-    translate([0,0,total_height*2])
-    inserts(insert_1_depth);
-}
-
-if (insert_2_depth > 0) {
-    translate([total_width*1.5,0,total_height*2])
-    inserts(insert_2_depth);
-}
-
-if (insert_3_depth > 0) {
-    translate([total_width*3,0,total_height*2])
-    inserts(insert_3_depth);
+// Optional, create external inserts to reduce the depth of hangboard
+for (i  = [0:len(inserts_depth)-1]) {
+  translate([0,distance_between_bases*2*(1+i),0])
+    insert(width=inserts_depth[i], round=false);
 }
