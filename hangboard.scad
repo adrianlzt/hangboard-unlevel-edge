@@ -1,3 +1,4 @@
+/* [Finger lengths] */
 // Right hand index finger height
 h2_right = 19.8;
 // Right hand middle finger height
@@ -16,6 +17,11 @@ h4_left = 16;
 // Left hand pinky finger height
 h5_left = 0;
 
+/* [Other settings] */
+
+// Rounding the edges of the frame (cause problems with Thingverse Customizer)
+edge_round_radius = 2; // [1:5]
+
 // Width for each finger position
 finger_width = 25; // [5:40]
 // How deep the hangboard is
@@ -24,22 +30,24 @@ base_depth = 30; // [5:60]
 // Distance between the two middle fingers surfaces
 distance_between_hands = 30;
 
+/* [Inserts] */
+
 // Create inserts to reduce the depth of the hangboard?
 create_inserts = "no";  // [yes,no]
 
 // Depth of the inserts. To remove the inserts, define an empty list
 inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
 
+/* [Advanced settings] */
+
 // Thickness of the frame walls
 frame_thickness = 9; // [5:15]
+
 // Radius of the holes in the frame
 hole_radius = 6; // [4:12]
 
 finger_platform_concavity = 35;
 finger_platform_concavity_depth = 2;
-
-// Rounding the edges of the frame
-edge_round_radius = 2; // [1:5]
 
 round_edges_fn = 10;
 
@@ -94,18 +102,19 @@ module frame() {
 // Two holes to pass the rope
 module holes() {
   translate([-hole_radius-frame_thickness, distance_between_bases/2, 0])
-    extrudeWithRadius(base_depth+frame_thickness,-1,-1)
+    extrudeWithRadius(base_depth+frame_thickness+0.2,-edge_round_radius,-edge_round_radius)
       circle(hole_radius);
   translate([+hole_radius+frame_thickness+4*finger_width, distance_between_bases/2, 0])
-    extrudeWithRadius(base_depth+frame_thickness,-1,-1)
+    extrudeWithRadius(base_depth+frame_thickness+0.2,-edge_round_radius,-edge_round_radius)
       circle(hole_radius);
 }
 
 // Remove from the frame the insert and the holes
 difference() {
   frame();
-  holes();
-  translate([0,0,frame_thickness])
+  translate([0,0,-0.1])
+    holes();
+  translate([0,0,frame_thickness+0.1])
     insert(width=base_depth);
 }
 
