@@ -47,16 +47,21 @@ module insert(width, round=true) {
     right_hand = [h2_right, h3_right, h4_right, h5_right];
     left_hand = [h2_left, h3_left, h4_left, h5_left];
 
-    function finger_points(hand, start, reverse=false) = [
-        for (i = [0:3]) let(
-            x = (start + (reverse ? -1 : 1) * i) * finger_width,
-            h = reverse ? (distance_between_bases - hand[3-i]) : hand[i]
-        ) each [
-            [x, h, 0],
-            [x + (reverse ? -1 : 1) * finger_width/2, h + (reverse ? 1 : -1) * finger_platform_concavity_depth, finger_platform_concavity],
-            [x + (reverse ? -1 : 1) * finger_width, h, 0]
-        ]
-    ];
+    function finger_points(hand, start, reverse=false) =
+        [for (i = [0:3])
+            for (j = [0:2])
+                (j == 0) ?
+                    [(start + (reverse ? -1 : 1) * i) * finger_width,
+                    reverse ? (distance_between_bases - hand[3-i]) : hand[i],
+                    0] :
+                (j == 1) ?
+                    [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width/2,
+                    (reverse ? (distance_between_bases - hand[3-i]) : hand[i]) + (reverse ? 1 : -1) * finger_platform_concavity_depth,
+                    finger_platform_concavity] :
+                    [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width,
+                    reverse ? (distance_between_bases - hand[3-i]) : hand[i],
+                    0]
+        ];
 
     radiiPoints = concat(
         finger_points(right_hand, 0),

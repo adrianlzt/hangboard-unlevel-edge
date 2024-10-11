@@ -1,4 +1,4 @@
-# Parametrizable unlevel edge hangboard for climbing
+# Customizable unlevel edge hangboard for climbing
 
 One-hand hangboard for climbing training with different supports for each finger.
 
