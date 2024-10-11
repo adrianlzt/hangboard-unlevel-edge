@@ -1,14 +1,14 @@
 // Heights for each finger position - Right hand
-h2_right = 4;  // Index finger height
-h3_right = 15;  // Middle finger height
-h4_right = 5;  // Ring finger height
-h5_right = 2;  // Pinky finger height
+h2_right = 19.8;  // Index finger height
+h3_right = 30.8;  // Middle finger height
+h4_right = 18.4;  // Ring finger height
+h5_right = 0;  // Pinky finger height
 
 // Heights for each finger position - Left hand
-h2_left = 4;   // Index finger height
-h3_left = 15;   // Middle finger height
-h4_left = 5;   // Ring finger height
-h5_left = 2;   // Pinky finger height
+h2_left = 15.5;   // Index finger height
+h3_left = 26.5;   // Middle finger height
+h4_left = 16;   // Ring finger height
+h5_left = 0;   // Pinky finger height
 
 finger_width = 25;      // Width for each finger position
 base_depth = 30;        // How deep the hangboard is
