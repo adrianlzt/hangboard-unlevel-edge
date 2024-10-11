@@ -1,34 +1,43 @@
-// Heights for each finger position - Right hand
-h2_right = 19.8;  // Index finger height
-h3_right = 30.8;  // Middle finger height
-h4_right = 18.4;  // Ring finger height
-h5_right = 0;  // Pinky finger height
+// Right hand index finger height
+h2_right = 19.8;
+// Right hand middle finger height
+h3_right = 30.8;
+// Right hand ring finger height
+h4_right = 18.4;
+// Right hand pinky finger height
+h5_right = 0;
 
-// Heights for each finger position - Left hand
-h2_left = 15.5;   // Index finger height
-h3_left = 26.5;   // Middle finger height
-h4_left = 16;   // Ring finger height
-h5_left = 0;   // Pinky finger height
+// Left hand index finger height
+h2_left = 15.5;
+// Left hand middle finger height
+h3_left = 26.5;
+// Left hand ring finger height
+h4_left = 16;
+// Left hand pinky finger height
+h5_left = 0;
 
-finger_width = 25;      // Width for each finger position
-base_depth = 30;        // How deep the hangboard is
+// Width for each finger position
+finger_width = 25; // [5:40]
+// How deep the hangboard is
+base_depth = 30; // [5:60]
 
-// Distance between the two h3 surfaces
+// Distance between the two middle fingers surfaces
 distance_between_hands = 30;
 
-// To remove the inserts, define an empty list
-inserts_depth = [base_depth/2, base_depth/3, base_depth/4];  // Depth of the inserts
+// Depth of the inserts. To remove the inserts, define an empty list
+inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
 
-// Frame parameters
-frame_thickness = 9;   // Thickness of the frame walls
-hole_radius = 6;  // Radius of the holes in the frame
+// Thickness of the frame walls
+frame_thickness = 9; // [5:15]
+// Radius of the holes in the frame
+hole_radius = 6; // [4:12]
 
-// Parameters to create the finger platform concavity
 finger_platform_concavity = 35;
 finger_platform_concavity_depth = 2;
 
-// Decide to round the edge of the finger platform or not
-edge_round_radius = 2;
+// Rounding the edges of the frame
+edge_round_radius = 2; // [1:5]
+
 round_edges_fn = 30;
 
 distance_between_bases = distance_between_hands + h3_right + h3_left;
