@@ -24,6 +24,9 @@ base_depth = 30; // [5:60]
 // Distance between the two middle fingers surfaces
 distance_between_hands = 30;
 
+// Create inserts to reduce the depth of the hangboard?
+create_inserts = "no";  // [yes,no]
+
 // Depth of the inserts. To remove the inserts, define an empty list
 inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
 
@@ -38,7 +41,7 @@ finger_platform_concavity_depth = 2;
 // Rounding the edges of the frame
 edge_round_radius = 2; // [1:5]
 
-round_edges_fn = 30;
+round_edges_fn = 10;
 
 distance_between_bases = distance_between_hands + h3_right + h3_left;
 
@@ -107,9 +110,11 @@ difference() {
 }
 
 // Optional, create external inserts to reduce the depth of hangboard
-for (i  = [0:len(inserts_depth)-1]) {
-  translate([0,distance_between_bases*2*(1+i),0])
-    insert(width=inserts_depth[i], round=false);
+if (create_inserts == "yes") {
+  for (i  = [0:len(inserts_depth)-1]) {
+    translate([0,distance_between_bases*2*(1+i),0])
+      insert(width=inserts_depth[i], round=false);
+  }
 }
 
 // Library: round-anything
