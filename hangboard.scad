@@ -49,7 +49,7 @@ hole_radius = 6; // [4:12]
 finger_platform_concavity = 35;
 finger_platform_concavity_depth = 2;
 
-round_edges_fn = 10;
+round_edges_fn = 30;
 
 distance_between_bases = distance_between_hands + h3_right + h3_left;
 
@@ -114,6 +114,14 @@ module holes() {
       circle(hole_radius);
   translate([+hole_radius+frame_thickness+4*finger_width, distance_between_bases/2, 0])
     extrudeWithRadius(base_depth+frame_thickness+0.2,-edge_round_radius,-edge_round_radius)
+      circle(hole_radius);
+
+  // Avoid coincident resulting faces
+  translate([-hole_radius-frame_thickness, distance_between_bases/2, -0.5])
+    linear_extrude(height=base_depth+frame_thickness+1)
+      circle(hole_radius);
+  translate([+hole_radius+frame_thickness+4*finger_width, distance_between_bases/2, -0.5])
+    linear_extrude(height=base_depth+frame_thickness+1)
       circle(hole_radius);
 }
 
