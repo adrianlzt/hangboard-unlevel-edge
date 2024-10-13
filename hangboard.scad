@@ -19,7 +19,7 @@ h5_left = 0;
 
 /* [Other settings] */
 
-// Rounding the edges of the frame (cause problems with Thingverse Customizer)
+// Rounding the edges of the frame
 edge_round_radius = 2; // [1:5]
 
 // Width for each finger position
@@ -33,7 +33,7 @@ distance_between_hands = 30;
 /* [Inserts] */
 
 // Create inserts to reduce the depth of the hangboard?
-create_inserts = "no";  // [yes,no]
+create_inserts = "yes";  // [yes,no]
 
 // Depth of the inserts. To remove the inserts, define an empty list
 inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
@@ -54,7 +54,8 @@ round_edges_fn = 10;
 distance_between_bases = distance_between_hands + h3_right + h3_left;
 
 // The object to be subsctracted from the frame, with "negative fillets" if round is true, to get round edges in the frame.
-module insert(width, round=true) {
+// If extractable is true, it will add a semicircle hole to be able to remove the insert from the hangboard.
+module insert(width, round=true, extractable=false) {
     right_hand = [h2_right, h3_right, h4_right, h5_right];
     left_hand = [h2_left, h3_left, h4_left, h5_left];
 
@@ -79,7 +80,15 @@ module insert(width, round=true) {
         finger_points(left_hand, 4, true)
     );
 
-    polyRoundExtrude(radiiPoints, width, (round ? -edge_round_radius : 0), 0, fn=round_edges_fn);
+    if (extractable) {
+      difference() {
+        polyRoundExtrude(radiiPoints, width, (round ? -edge_round_radius : 0), 0, fn=round_edges_fn);
+        translate([4*finger_width,distance_between_bases/2,-0.1])
+          cylinder(h=width+0.2, r=distance_between_bases/6, $fn=20);
+      }
+    } else {
+      polyRoundExtrude(radiiPoints, width, (round ? -edge_round_radius : 0), 0, fn=round_edges_fn);
+    }
 }
 
 // Main structure of the hangboard
@@ -95,7 +104,6 @@ module frame() {
 
     [-frame_thickness*4-hole_radius, distance_between_bases/2, 30],
   ];
-
   polyRoundExtrude(radiiPoints, base_depth+frame_thickness, edge_round_radius, 0, fn=round_edges_fn);
 }
 
@@ -122,7 +130,7 @@ difference() {
 if (create_inserts == "yes") {
   for (i  = [0:len(inserts_depth)-1]) {
     translate([0,distance_between_bases*2*(1+i),0])
-      insert(width=inserts_depth[i], round=false);
+      insert(width=inserts_depth[i], round=false, extractable=true);
   }
 }
 
