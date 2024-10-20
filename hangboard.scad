@@ -30,7 +30,7 @@ distance_between_hands = 30;
 /* [Inserts] */
 
 // Create inserts to reduce the depth of the hangboard?
-create_inserts = "yes";  // [yes,no]
+create_inserts = "no";  // [yes,no]
 
 // Depth of the inserts. To remove the inserts, define an empty list
 inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
@@ -96,21 +96,19 @@ module frame(corner_radius = 20) {
         polygon(radiiPoints);
 }
 
-// Two holes to pass the rope
-module holes() {
-  translate([-hole_radius-frame_thickness, distance_between_bases/2, 0])
-    linear_extrude(height=base_depth+frame_thickness+0.2)
-      circle(hole_radius);
-  translate([+hole_radius+frame_thickness+4*finger_width, distance_between_bases/2, 0])
-    linear_extrude(height=base_depth+frame_thickness+0.2)
-      circle(hole_radius);
+// Hole to pass the rope
+module hole() {
+  linear_extrude(height=base_depth+frame_thickness+0.2)
+    circle(hole_radius);
 }
 
 // Remove from the frame the insert and the holes
 difference() {
   frame();
-  translate([0,0,-0.1])
-    holes();
+  translate([-hole_radius-frame_thickness, distance_between_bases/2, 0])
+    hole();
+  translate([+hole_radius+frame_thickness+4*finger_width, distance_between_bases/2, 0])
+    hole();
   translate([0,0,frame_thickness+0.1])
     insert(width=base_depth+0.1);
 }
