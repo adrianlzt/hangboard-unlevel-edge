@@ -1,20 +1,20 @@
 /* [Finger lengths] */
 // Right hand index finger height
-h2_right = 19.8;
+h2_right = 13.8;
 // Right hand middle finger height
-h3_right = 30.8;
+h3_right = 24.8;
 // Right hand ring finger height
-h4_right = 18.4;
-// Right hand pinky finger height
+h4_right = 12.4;
+// Right hand pinky finger height. Leave it as 0, as the reference for the rest.
 h5_right = 0;
 
 // Left hand index finger height
-h2_left = 15.5;
+h2_left = 9.5;
 // Left hand middle finger height
-h3_left = 26.5;
+h3_left = 20.5;
 // Left hand ring finger height
-h4_left = 16;
-// Left hand pinky finger height
+h4_left = 10;
+// Left hand pinky finger height. Leave it as 0, as the reference for the rest.
 h5_left = 0;
 
 /* [Other settings] */
