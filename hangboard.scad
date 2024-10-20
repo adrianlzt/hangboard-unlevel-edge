@@ -20,7 +20,7 @@ h5_left = 0;
 /* [Other settings] */
 
 // Width for each finger position
-finger_width = 25; // [5:40]
+finger_width = 21; // [5:40]
 // How deep the hangboard is
 base_depth = 30; // [5:60]
 
