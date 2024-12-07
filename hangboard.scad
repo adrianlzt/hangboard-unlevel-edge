@@ -123,6 +123,7 @@ module frame(corner_radius = 20) {
 
   echo("Hangboard width: ", 4*finger_width+2*frame_thickness+lateral_extra_witdh);
   echo("Hangboard height: ", distance_between_bases+2*frame_thickness);
+  echo("Hangboard depth: ", base_depth+frame_thickness);
 }
 
 // Hole to pass the rope
