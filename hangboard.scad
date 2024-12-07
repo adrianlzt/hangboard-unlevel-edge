@@ -25,7 +25,7 @@ finger_width = 20; // [5:40]
 base_depth = 30; // [5:60]
 
 // Distance between the two middle fingers surfaces
-distance_between_hands = 20;
+distance_between_hands = 25;
 
 /* [Inserts] */
 
