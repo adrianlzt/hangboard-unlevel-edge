@@ -38,7 +38,7 @@ inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
 /* [Advanced settings] */
 
 // Thickness of the frame walls
-frame_thickness = 9; // [5:15]
+frame_thickness = 10; // [5:15]
 
 // Radius of the holes in the frame
 hole_diameter = 8; // [4:12]
@@ -46,6 +46,9 @@ hole_radius = hole_diameter/2;
 
 // Extra space between index finger and lateral wall
 extra_index_finger_space = 2;
+
+// Add lateral holes, parallel to incut
+add_lateral_holes = "no"; // [yes,no]
 
 finger_platform_concavity_depth = 2;
 
@@ -89,19 +92,24 @@ module insert(width, corner_radius=5) {
 
 // Main structure of the hangboard
 module frame(corner_radius = 20) {
+  lateral_extra_witdh = add_lateral_holes == "yes" ? frame_thickness+hole_diameter : 0;
+
   radiiPoints = [
     [-frame_thickness, -frame_thickness], // bottom left
     [4*finger_width+frame_thickness, -frame_thickness], // bottom right
-    [4*finger_width+frame_thickness*2+hole_diameter, distance_between_bases/2], // right middle
+    [4*finger_width+frame_thickness+lateral_extra_witdh, distance_between_bases/2], // right middle
     [4*finger_width+frame_thickness, distance_between_bases+frame_thickness], // top right
     [-frame_thickness, distance_between_bases+frame_thickness], // top left
-    [-frame_thickness*2-hole_diameter, distance_between_bases/2], // left middle
+    [-frame_thickness-lateral_extra_witdh, distance_between_bases/2], // left middle
   ];
 
   linear_extrude(height=base_depth+frame_thickness)
     offset(r = corner_radius)
       offset(r = -corner_radius)
         polygon(radiiPoints);
+
+  echo("Hangboard width: ", 4*finger_width+2*frame_thickness+lateral_extra_witdh);
+  echo("Hangboard height: ", distance_between_bases+2*frame_thickness);
 }
 
 // Hole to pass the rope
