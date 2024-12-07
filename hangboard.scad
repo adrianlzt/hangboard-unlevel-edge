@@ -41,7 +41,8 @@ inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
 frame_thickness = 9; // [5:15]
 
 // Radius of the holes in the frame
-hole_radius = 6; // [4:12]
+hole_diameter = 8; // [4:12]
+hole_radius = hole_diameter/2;
 
 // Extra space between index finger and lateral wall
 extra_index_finger_space = 2;
@@ -89,12 +90,12 @@ module insert(width, corner_radius=5) {
 // Main structure of the hangboard
 module frame(corner_radius = 20) {
   radiiPoints = [
-    [-frame_thickness, -frame_thickness],
-    [4*finger_width+frame_thickness, -frame_thickness],
-    [4*finger_width+frame_thickness*4+hole_radius, distance_between_bases/2],
-    [4*finger_width+frame_thickness, distance_between_bases+frame_thickness],
-    [-frame_thickness, distance_between_bases+frame_thickness],
-    [-frame_thickness*4-hole_radius, distance_between_bases/2],
+    [-frame_thickness, -frame_thickness], // bottom left
+    [4*finger_width+frame_thickness, -frame_thickness], // bottom right
+    [4*finger_width+frame_thickness*2+hole_diameter, distance_between_bases/2], // right middle
+    [4*finger_width+frame_thickness, distance_between_bases+frame_thickness], // top right
+    [-frame_thickness, distance_between_bases+frame_thickness], // top left
+    [-frame_thickness*2-hole_diameter, distance_between_bases/2], // left middle
   ];
 
   linear_extrude(height=base_depth+frame_thickness)
