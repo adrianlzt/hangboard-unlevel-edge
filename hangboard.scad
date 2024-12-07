@@ -43,6 +43,9 @@ frame_thickness = 9; // [5:15]
 // Radius of the holes in the frame
 hole_radius = 6; // [4:12]
 
+// Extra space between index finger and lateral wall
+extra_index_finger_space = 2;
+
 finger_platform_concavity_depth = 2;
 
 distance_between_bases = distance_between_hands + h3_right + h3_left;
@@ -52,18 +55,22 @@ module insert(width, corner_radius=5) {
     right_hand = [h2_right, h3_right, h4_right, h5_right];
     left_hand = [h2_left, h3_left, h4_left, h5_left];
 
+    // (start == 0 ? start-1 : start) is a workaround to avoid the "for" loop to start at 0
     function finger_points(hand, start, reverse=false) =
         [for (i = [0:3])
             for (j = [0:2])
                 (j == 0) ?
-                    [(start + (reverse ? -1 : 1) * i) * finger_width,
+                    // The i==0 condition is to add the extra space between the index finger and the lateral wall
+                    [(start + (reverse ? -1 : 1) * i) * finger_width - ((i == 0 && !reverse) ? extra_index_finger_space : 0),
                     reverse ? (distance_between_bases - hand[3-i]) : hand[i],
                     ] :
+                // j == 1 is the middle point of the finger
                 (j == 1) ?
                     [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width/2,
                     (reverse ? (distance_between_bases - hand[3-i]) : hand[i]) + (reverse ? 1 : -1) * finger_platform_concavity_depth,
                     ] :
-                    [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width,
+                    // The i==3 condition is to add the extra space between the index finger and the lateral wall
+                    [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width - ((i == 3 && reverse) ? extra_index_finger_space : 0),
                     reverse ? (distance_between_bases - hand[3-i]) : hand[i],
                     ]
         ];
