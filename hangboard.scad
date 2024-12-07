@@ -30,10 +30,15 @@ distance_between_hands = 20;
 /* [Inserts] */
 
 // Create inserts to reduce the depth of the hangboard?
-create_inserts = "no";  // [yes,no]
+// Probably better to create them using a laser cutter.
+create_inserts = "yes";  // [yes,no]
 
-// Depth of the inserts. To remove the inserts, define an empty list
-inserts_depth = [base_depth/2, base_depth/3, base_depth/4];
+// Margin between the inserts and the hangboard (mm)
+// Inserts are reduced by this margin to fit inside the hangboard.
+inserts_margin = 0.8;
+
+// Depth of the inserts.
+inserts_depth = [base_depth/2];
 
 /* [Advanced settings] */
 
@@ -55,7 +60,8 @@ finger_platform_concavity_depth = 2;
 distance_between_bases = distance_between_hands + h3_right + h3_left;
 
 // The object to be subsctracted from the frame, with "negative fillets"
-module insert(width, corner_radius=5) {
+// Margin is to create the inserts with a margin from the frame.
+module insert(width, corner_radius=5, margin=0) {
     right_hand = [h2_right, h3_right, h4_right, h5_right];
     left_hand = [h2_left, h3_left, h4_left, h5_left];
 
@@ -65,18 +71,25 @@ module insert(width, corner_radius=5) {
             for (j = [0:2])
                 (j == 0) ?
                     // The i==0 condition is to add the extra space between the index finger and the lateral wall
-                    [(start + (reverse ? -1 : 1) * i) * finger_width - ((i == 0 && !reverse) ? extra_index_finger_space : 0),
-                    reverse ? (distance_between_bases - hand[3-i]) : hand[i],
+                    // The i==1 condition is to handle margins for the inserts
+                    [(start + (reverse ? -1 : 1) * i) * finger_width - ((i == 0 && !reverse) ? extra_index_finger_space : 0)
+                      + ((!reverse && i == 1) || (reverse && (i == 1 || i == 2)) ? -1 : 1) * (reverse ? -1 : 1) * margin,
+                    (reverse ? (distance_between_bases - hand[3-i]) : hand[i]) + (reverse ? -1 : 1) * margin,
                     ] :
                 // j == 1 is the middle point of the finger
                 (j == 1) ?
                     [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width/2,
-                    (reverse ? (distance_between_bases - hand[3-i]) : hand[i]) + (reverse ? 1 : -1) * finger_platform_concavity_depth,
+                    ((reverse ? (distance_between_bases - hand[3-i]) : hand[i]) + (reverse ? 1 : -1) * finger_platform_concavity_depth) + (reverse ? -1 : 1) * margin,
                     ] :
-                    // The i==3 condition is to add the extra space between the index finger and the lateral wall
-                    [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width - ((i == 3 && reverse) ? extra_index_finger_space : 0),
-                    reverse ? (distance_between_bases - hand[3-i]) : hand[i],
-                    ]
+                // j == 2 is the end of the finger
+                // The i==3 condition is to add the extra space between the index finger and the lateral wall
+                [(start + (reverse ? -1 : 1) * i) * finger_width + (reverse ? -1 : 1) * finger_width
+                  - ((i == 3 && reverse) ? extra_index_finger_space : 0)
+                  - ((
+                      (!reverse && (i == 0 || i == 3)) || (reverse && (i == 2))
+                      ? 1 : -1) * margin),
+                (reverse ? (distance_between_bases - hand[3-i]) : hand[i]) + (reverse ? -1 : 1) * margin,
+                ]
         ];
 
     radiiPoints = concat(
@@ -113,9 +126,9 @@ module frame(corner_radius = 20) {
 }
 
 // Hole to pass the rope
-module hole() {
+module hole(radius=hole_radius) {
   linear_extrude(height=base_depth+frame_thickness+0.2)
-    circle(hole_radius);
+    circle(radius);
 }
 
 // Remove from the frame the insert and the holes
@@ -133,6 +146,12 @@ difference() {
 if (create_inserts == "yes") {
   for (i  = [0:len(inserts_depth)-1]) {
     translate([0,distance_between_bases*2*(1+i),0])
-      insert(width=inserts_depth[i]);
+      difference() {
+        insert(width=inserts_depth[i], margin=inserts_margin);
+        translate([0, distance_between_bases/2, -0.1])
+          hole(finger_width/2.5);
+        translate([4*finger_width, distance_between_bases/2, -0.1])
+          hole(finger_width/2);
+      }
   }
 }
