@@ -20,12 +20,12 @@ h5_left = 0;
 /* [Other settings] */
 
 // Width for each finger position
-finger_width = 21; // [5:40]
+finger_width = 20; // [5:40]
 // How deep the hangboard is
 base_depth = 30; // [5:60]
 
 // Distance between the two middle fingers surfaces
-distance_between_hands = 30;
+distance_between_hands = 20;
 
 /* [Inserts] */
 
